@@ -1,10 +1,19 @@
 {
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/",          "destination": "/index.html"    },
-    { "source": "/dashboard", "destination": "/dashboard.html" },
-    { "source": "/blog",      "destination": "/blog.html"      },
-    { "source": "/help",      "destination": "/help.html"      },
-    { "source": "/removal",   "destination": "/removal.html"   }
+    { "source": "/",           "destination": "/index.html"    },
+    { "source": "/dashboard",  "destination": "/dashboard.html" },
+    { "source": "/blog",       "destination": "/blog.html"      },
+    { "source": "/help",       "destination": "/help.html"      },
+    { "source": "/removal",    "destination": "/removal.html"   },
+
+    { "source": "/stats",             "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/stats"             },
+    { "source": "/stats/:path*",      "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/stats/:path*"      },
+    { "source": "/health",            "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/health"            },
+    { "source": "/guilds",            "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/guilds"            },
+    { "source": "/guild/:path*",      "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/guild/:path*"      },
+    { "source": "/user/:path*",       "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/user/:path*"       },
+    { "source": "/messages/:path*",   "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/messages/:path*"   },
+    { "source": "/backfill/:path*",   "destination": "https://reads-tourist-surely-cartoon.trycloudflare.com/backfill/:path*"   }
   ]
 }
