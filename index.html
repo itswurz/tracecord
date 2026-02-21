@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tracecord // home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script>
+  // ── API Configuration ──────────────────────────────────────────────────────
+  // Set this to your Cloudflare Tunnel URL when you have one, e.g.:
+  // window.API_BASE = 'https://your-tunnel.trycloudflare.com';
+  // Leave empty string to use relative URLs (local / same-origin dev).
+  window.API_BASE = '';
+</script>
+<style>
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:90;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+  padding:0;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+  pointer-events:none;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer — rendered OUTSIDE sticky nav to avoid clipping */
+.nav-drawer{
+  position:fixed;
+  top:48px;left:0;right:0;
+  z-index:89;
+  background:rgba(10,10,18,.99);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  flex-direction:column;
+  padding:0;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-8px);
+  transition:opacity .22s ease,transform .22s ease;
+  display:flex;
+}
+.nav-drawer.open{
+  pointer-events:auto;
+  opacity:1;
+  transform:translateY(0);
+}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:13px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Show hamburger on mobile */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+}
+/* Always render drawer in DOM but hidden via opacity/pointer-events */
+
+:root {
+  --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#141420;--border:#1e1e2e;--border2:#2a2a3d;
+  --accent:#7c5cfc;--accent2:#a78bfa;--accent3:#06d6a0;
+  --red:#ff4d6d;--yellow:#ffd166;--blue:#60a5fa;--text:#e2e2f0;--text2:#8888aa;--text3:#555570;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+
+
+/* ── Hero ── */
+.hero{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:100px 24px 80px;}
+.hero::before{content:'';position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(124,92,252,.07) 0%,transparent 65%);pointer-events:none;}
+.hero-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--accent);margin-bottom:20px;display:flex;align-items:center;gap:10px;}
+.hero-eyebrow::before{content:'';width:32px;height:1px;background:var(--accent);}
+.hero-title{font-size:clamp(40px,7vw,84px);font-weight:800;line-height:1.0;letter-spacing:-.04em;color:var(--text);margin-bottom:24px;}
+.hero-title em{font-style:normal;color:var(--accent2);}
+.hero-desc{font-size:17px;color:var(--text2);max-width:560px;line-height:1.65;margin-bottom:44px;font-weight:400;}
+.hero-cta-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.cta-btn{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;text-decoration:none;padding:13px 28px;border-radius:3px;display:inline-flex;align-items:center;gap:8px;transition:all .2s;border:none;cursor:pointer;}
+.cta-btn.primary{background:var(--accent);color:#fff;box-shadow:0 0 0 0 rgba(124,92,252,.4);}
+.cta-btn.primary:hover{background:#6b4de6;box-shadow:0 0 0 6px rgba(124,92,252,.15);}
+.cta-btn.secondary{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.cta-btn.secondary:hover{border-color:var(--accent);color:var(--accent2);}
+.hero-stats-row{display:flex;gap:40px;margin-top:64px;padding-top:40px;border-top:1px solid var(--border);flex-wrap:wrap;}
+.hero-stat{display:flex;flex-direction:column;gap:4px;}
+.hero-stat-val{font-family:var(--mono);font-size:28px;font-weight:700;color:var(--text);letter-spacing:-.03em;}
+.hero-stat-val span{color:var(--accent2);}
+.hero-stat-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text3);}
+
+/* ── Features ── */
+.section{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:80px 24px;}
+.section-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+.section-eyebrow::before{content:'';width:20px;height:1px;background:var(--border2);}
+.section-title{font-size:clamp(26px,4vw,42px);font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:14px;line-height:1.1;}
+.section-sub{font-size:15px;color:var(--text2);max-width:520px;line-height:1.6;margin-bottom:60px;}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+.feature-card{background:var(--bg2);padding:32px 28px;transition:background .2s;position:relative;overflow:hidden;}
+.feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent2));opacity:0;transition:opacity .2s;}
+.feature-card:hover{background:var(--bg3);}
+.feature-card:hover::before{opacity:1;}
+.feature-icon{font-size:22px;margin-bottom:18px;display:block;color:var(--accent2);opacity:.85;}
+.feature-name{font-size:15px;font-weight:700;color:var(--text);margin-bottom:10px;letter-spacing:-.01em;}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.65;}
+.feature-tag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:2px;background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);color:var(--accent2);margin-top:14px;}
+
+/* ── How it works ── */
+.steps-wrap{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;position:relative;}
+.steps-wrap::before{content:'';position:absolute;top:20px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--border2) 15%,var(--border2) 85%,transparent);}
+.step{display:flex;flex-direction:column;gap:14px;}
+.step-num{font-family:var(--mono);font-size:11px;color:var(--accent);background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.25);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;letter-spacing:.05em;flex-shrink:0;position:relative;z-index:1;}
+.step-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.01em;}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.6;}
+
+/* ── Terminal demo ── */
+.terminal-demo{background:var(--bg2);border:1px solid var(--border);border-radius:6px;overflow:hidden;font-family:var(--mono);font-size:12px;}
+.terminal-hdr{display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.term-dot{width:10px;height:10px;border-radius:50%;}
+.term-dot.r{background:#ff5f56;}
+.term-dot.y{background:#ffbd2e;}
+.term-dot.g{background:#27c93f;}
+.terminal-title{font-size:10px;color:var(--text3);letter-spacing:.08em;margin-left:8px;}
+.terminal-body{padding:16px 14px;line-height:2;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.terminal-body .term-line{white-space:nowrap;}
+.term-line{display:flex;gap:8px;}
+.term-prompt{color:var(--accent);}
+.term-cmd{color:var(--text);}
+.term-out{color:var(--text2);}
+.term-out.green{color:var(--accent3);}
+.term-out.purple{color:var(--accent2);}
+.term-out.red{color:var(--red);}
+.term-blank{height:8px;}
+
+/* ── CTA banner ── */
+.cta-banner{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:60px 48px;display:flex;align-items:center;justify-content:space-between;gap:32px;position:relative;overflow:hidden;}
+.cta-banner::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(124,92,252,.08) 0%,transparent 70%);}
+.cta-banner-text{flex:1;}
+.cta-banner-title{font-size:28px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:10px;line-height:1.15;}
+.cta-banner-sub{font-size:14px;color:var(--text2);line-height:1.6;}
+.cta-banner-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0;}
+
+/* ── Footer ── */
+footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:40px 24px;max-width:1200px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;}
+.footer-logo{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.15em;}
+.footer-logo span{color:var(--accent);}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap;}
+.footer-link{font-family:var(--mono);font-size:10px;color:var(--text3);text-decoration:none;letter-spacing:.08em;transition:color .15s;}
+.footer-link:hover{color:var(--text2);}
+.footer-note{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:.05em;}
+
+/* ── Scroll animations ── */
+.fade-up{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+.fade-up.visible{opacity:1;transform:none;}
+
+@media(max-width:900px){
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .steps-wrap{grid-template-columns:1fr 1fr;gap:32px;}
+  .steps-wrap::before{display:none;}
+  .cta-banner{flex-direction:column;padding:40px 28px;}
+}
+@media(max-width:560px){
+  .features-grid{grid-template-columns:1fr;}
+  .steps-wrap{grid-template-columns:1fr;}
+}
+@media(max-width:640px){
+  .hero{padding:60px 16px 48px;}
+  .hero-title{letter-spacing:-.02em;}
+  .hero-stats-row{gap:20px;flex-wrap:wrap;}
+  .hero-stat-val{font-size:22px;}
+  .features-grid{grid-template-columns:1fr;}
+  .steps-wrap{grid-template-columns:1fr;}
+  .cta-banner{padding:28px 20px;}
+  .section{padding:48px 16px;}
+  footer{padding:28px 16px;flex-direction:column;align-items:flex-start;gap:12px;}
+}
+@media(max-width:400px){
+  .hero-cta-row{flex-direction:column;align-items:stretch;}
+  .cta-btn{justify-content:center;}
+  .hero-stats-row{grid-template-columns:1fr 1fr;display:grid;gap:16px;}
+  .hero-stat{align-items:flex-start;}
+}
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer */
+.nav-drawer{
+  display:none;
+  flex-direction:column;
+  background:rgba(10,10,18,.99);
+  border-top:1px solid var(--border);
+  padding:8px 0 12px;
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),padding .28s ease;
+}
+.nav-drawer.open{max-height:340px;padding:8px 0 16px;}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:12px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Responsive */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+  .nav-drawer{display:flex;}
+  .site-nav-inner{height:48px;}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ── SITE NAV ── -->
+<nav class="site-nav" id="site-nav">
+  <div class="site-nav-inner">
+    <a href="/" class="site-nav-logo"><span>//</span> tracecord</a>
+    <div class="site-nav-links">
+      <a href="/" class="site-nav-link active">home</a>
+      <a href="/dashboard" class="site-nav-link">dashboard</a>
+      <a href="/blog" class="site-nav-link">blog</a>
+      <a href="/help" class="site-nav-link">help</a>
+      <a href="/removal" class="site-nav-link nav-removal">removal</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<!-- Mobile nav drawer (outside sticky nav to prevent clipping) -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="/" class="nav-drawer-link active">home</a>
+  <a href="/dashboard" class="nav-drawer-link">dashboard</a>
+  <a href="/blog" class="nav-drawer-link">blog</a>
+  <a href="/help" class="nav-drawer-link">help</a>
+  <a href="/removal" class="nav-drawer-link nav-removal">removal request</a>
+</div><!-- HERO -->
+<section class="hero">
+  <div class="hero-eyebrow">discord message tracker</div>
+  <h1 class="hero-title">Every message.<br><em>Nothing forgotten.</em></h1>
+  <p class="hero-desc">A comprehensive Discord message tracking and analysis platform. Search deleted messages, trace edits, reconstruct timelines, and explore user behavior across servers.</p>
+  <div class="hero-cta-row">
+    <a href="/dashboard" class="cta-btn primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      open dashboard
+    </a>
+    <a href="/help" class="cta-btn secondary">read the docs →</a>
+  </div>
+  <div class="hero-stats-row">
+    <div class="hero-stat">
+      <div class="hero-stat-val"><span id="stat-msgs">—</span></div>
+      <div class="hero-stat-lbl">messages archived</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val"><span id="stat-users">—</span></div>
+      <div class="hero-stat-lbl">users indexed</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val"><span id="stat-guilds">—</span></div>
+      <div class="hero-stat-lbl">servers tracked</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val"><span id="stat-deleted">—</span></div>
+      <div class="hero-stat-lbl">deleted recovered</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section fade-up">
+  <div class="section-eyebrow">capabilities</div>
+  <h2 class="section-title">Built for deep<br>message intelligence</h2>
+  <p class="section-sub">Everything you need to investigate, analyze, and understand Discord activity across time.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+      <div class="feature-name">Advanced Message Search</div>
+      <p class="feature-desc">Full-text search across all archived messages with filters for server, channel, user, date range, attachments, and message type.</p>
+      <span class="feature-tag">real-time</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg></span>
+      <div class="feature-name">Deleted Message Recovery</div>
+      <p class="feature-desc">Recover and read messages that have been deleted from Discord. Full content, timestamp, and metadata preserved.</p>
+      <span class="feature-tag">forensics</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+      <div class="feature-name">Edit History Tracking</div>
+      <p class="feature-desc">See every version of every edited message with diff highlighting — know exactly what changed and when.</p>
+      <span class="feature-tag">audit trail</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+      <div class="feature-name">User Profile Analysis</div>
+      <p class="feature-desc">Deep profile cards with message stats, activity heatmaps, writing style analysis, voice session history, and name change timelines.</p>
+      <span class="feature-tag">behavioral</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="5" y2="17"/><line x1="12" y1="7" x2="19" y2="17"/><line x1="5" y1="19" x2="19" y2="19"/></svg></span>
+      <div class="feature-name">Interaction Graph</div>
+      <p class="feature-desc">Visualize who talks to whom with force-directed interaction graphs. Discover clusters, bridges, and isolated users.</p>
+      <span class="feature-tag">network</span>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+      <div class="feature-name">Timeline Reconstruction</div>
+      <p class="feature-desc">Reconstruct the true chronological record of any channel or user — including messages that were deleted or edited after posting.</p>
+      <span class="feature-tag">historical</span>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section fade-up">
+  <div class="section-eyebrow">workflow</div>
+  <h2 class="section-title">How it works</h2>
+  <p class="section-sub">The Tracecord bot listens passively and stores everything in a queryable database.</p>
+  <div class="steps-wrap">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-title">Bot joins server</div>
+      <p class="step-desc">The Tracecord bot is added to a Discord server with read permissions and begins passively listening to all accessible channels.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-title">Messages captured</div>
+      <p class="step-desc">Every message, edit, deletion, reaction, attachment, and voice event is captured in real-time and written to the database.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-title">Backfill runs</div>
+      <p class="step-desc">Historical message backfill runs on all accessible channels, filling in the history before the bot's join date where permitted.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-title">Dashboard access</div>
+      <p class="step-desc">Query, search, and analyze everything through the dashboard with advanced search, user profiles, and timeline tools.</p>
+    </div>
+  </div>
+</section>
+
+<!-- TERMINAL -->
+<section class="section fade-up">
+  <div class="section-eyebrow">under the hood</div>
+  <h2 class="section-title">What gets archived</h2>
+  <p class="section-sub">Every event type is captured and queryable.</p>
+  <div class="terminal-demo">
+    <div class="terminal-hdr">
+      <div class="term-dot r"></div>
+      <div class="term-dot y"></div>
+      <div class="term-dot g"></div>
+      <span class="terminal-title">tracecord.events — live capture log</span>
+    </div>
+    <div class="terminal-body">
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out green">[MESSAGE_CREATE]</span><span class="term-cmd">user 342819... · #general · "hey did anyone see the announcement?"</span></div>
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out purple">[MESSAGE_UPDATE]</span><span class="term-cmd">user 342819... · edited → "hey did anyone see the *server* announcement?"</span></div>
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out red">[MESSAGE_DELETE]</span><span class="term-cmd">msg 112938... · user 881033... · deleted from #mod-chat</span></div>
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out green">[REACTION_ADD]</span><span class="term-cmd">user 554201... · 👍 · msg 112938...</span></div>
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out purple">[VOICE_STATE_UPDATE]</span><span class="term-cmd">user 882011... · joined "General VC" · guild 990123...</span></div>
+      <div class="term-line"><span class="term-prompt">●</span><span class="term-out green">[MEMBER_UPDATE]</span><span class="term-cmd">user 342819... · display_name changed → "Velocity"</span></div>
+      <div class="term-blank"></div>
+      <div class="term-line"><span class="term-out green">✓</span><span class="term-cmd" style="color:var(--text3)">all events persisted · db write latency 1.2ms</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="section fade-up">
+  <div class="cta-banner">
+    <div class="cta-banner-text">
+      <div class="cta-banner-title">Ready to explore Tracecord?</div>
+      <p class="cta-banner-sub">Open the dashboard to search messages, investigate users, and reconstruct timelines. If your data is archived and you'd like it removed, submit a removal request.</p>
+    </div>
+    <div class="cta-banner-actions">
+      <a href="/dashboard" class="cta-btn primary">open dashboard</a>
+      <a href="/removal" class="cta-btn secondary">request removal</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo"><span>//</span> tracecord</div>
+  <div class="footer-links">
+    <a href="/" class="footer-link">home</a>
+    <a href="/dashboard" class="footer-link">dashboard</a>
+    <a href="/blog" class="footer-link">blog</a>
+    <a href="/help" class="footer-link">help</a>
+    <a href="/removal" class="footer-link">removal</a>
+  </div>
+  <div class="footer-note">tracecord · not affiliated with discord inc.</div>
+</footer>
+
+<script>
+// Scroll reveal
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
+// Load live stats from API
+async function loadStats() {
+  try {
+    const r = await fetch((window.API_BASE || '') + '/stats');
+    if (!r.ok) return;
+    const d = await r.json();
+    const fmt = n => n >= 1e6 ? (n/1e6).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(0)+'K' : String(n);
+    if (d.messages) document.getElementById('stat-msgs').textContent = fmt(d.messages);
+    if (d.users)    document.getElementById('stat-users').textContent = fmt(d.users);
+    if (d.guilds)   document.getElementById('stat-guilds').textContent = fmt(d.guilds);
+    if (d.deleted)  document.getElementById('stat-deleted').textContent = fmt(d.deleted);
+  } catch(e) {}
+}
+loadStats();
+</script>
+
+
+<script>
+function toggleNav(){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  if(!h||!d)return;
+  const open=!d.classList.contains('open');
+  d.classList.toggle('open',open);
+  h.classList.toggle('open',open);
+  h.setAttribute('aria-expanded',String(open));
+}
+document.addEventListener('click',function(e){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  const nav=document.getElementById('site-nav');
+  if(!d||!h)return;
+  if(d.classList.contains('open')&&!nav.contains(e.target)&&!d.contains(e.target)){
+    d.classList.remove('open');
+    h.classList.remove('open');
+    h.setAttribute('aria-expanded','false');
+  }
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.nav-drawer-link').forEach(function(l){
+    l.addEventListener('click',function(){
+      const d=document.getElementById('nav-drawer');
+      const h=document.getElementById('nav-hamburger');
+      if(d)d.classList.remove('open');
+      if(h){h.classList.remove('open');h.setAttribute('aria-expanded','false');}
+    });
+  });
+});
+</script>
+</body>
+</html>

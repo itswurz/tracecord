@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tracecord // blog</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:90;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+  padding:0;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+  pointer-events:none;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer — rendered OUTSIDE sticky nav to avoid clipping */
+.nav-drawer{
+  position:fixed;
+  top:48px;left:0;right:0;
+  z-index:89;
+  background:rgba(10,10,18,.99);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  flex-direction:column;
+  padding:0;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-8px);
+  transition:opacity .22s ease,transform .22s ease;
+  display:flex;
+}
+.nav-drawer.open{
+  pointer-events:auto;
+  opacity:1;
+  transform:translateY(0);
+}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:13px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Show hamburger on mobile */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+}
+/* Always render drawer in DOM but hidden via opacity/pointer-events */
+
+:root {
+  --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#141420;--border:#1e1e2e;--border2:#2a2a3d;
+  --accent:#7c5cfc;--accent2:#a78bfa;--accent3:#06d6a0;
+  --red:#ff4d6d;--yellow:#ffd166;--blue:#60a5fa;--text:#e2e2f0;--text2:#8888aa;--text3:#555570;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+.site-nav{background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.site-nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:44px;}
+.site-nav-logo{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;text-decoration:none;}
+.site-nav-logo span{color:var(--accent);}
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:6px 12px;border-radius:2px;transition:color .15s,background .15s;}
+.site-nav-link:hover{color:var(--text2);background:var(--bg2);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.1);}
+.site-nav-link.nav-removal{color:var(--red);border:1px solid rgba(255,77,109,.2);padding:5px 11px;}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.4);}
+
+.shell{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:60px 24px 100px;}
+
+.page-hdr{margin-bottom:60px;padding-bottom:32px;border-bottom:1px solid var(--border);}
+.page-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;}
+.page-title{font-size:clamp(30px,5vw,52px);font-weight:800;letter-spacing:-.04em;color:var(--text);line-height:1.05;margin-bottom:12px;}
+.page-sub{font-size:15px;color:var(--text2);line-height:1.6;}
+
+/* ── Filter tags ── */
+.blog-filters{display:flex;gap:6px;margin-bottom:40px;flex-wrap:wrap;}
+.blog-filter{font-family:var(--mono);font-size:10px;padding:5px 12px;border:1px solid var(--border2);border-radius:12px;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s;letter-spacing:.05em;}
+.blog-filter:hover{border-color:var(--accent);color:var(--accent2);}
+.blog-filter.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── Featured post ── */
+.post-featured{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:40px 36px;margin-bottom:32px;position:relative;overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.post-featured::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--accent),var(--accent3));}
+.post-featured:hover{border-color:var(--border2);}
+.post-tag{display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;border-radius:2px;margin-bottom:16px;}
+.post-tag.update{background:rgba(124,92,252,.12);border:1px solid rgba(124,92,252,.3);color:var(--accent2);}
+.post-tag.feature{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.25);color:var(--accent3);}
+.post-tag.analysis{background:rgba(255,209,102,.08);border:1px solid rgba(255,209,102,.25);color:var(--yellow);}
+.post-tag.privacy{background:rgba(255,77,109,.08);border:1px solid rgba(255,77,109,.25);color:var(--red);}
+.post-featured-badge{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:rgba(124,92,252,.1);border:1px solid rgba(124,92,252,.2);padding:2px 8px;border-radius:2px;margin-bottom:16px;display:inline-block;margin-right:8px;}
+.post-title{font-size:24px;font-weight:800;letter-spacing:-.03em;color:var(--text);margin-bottom:10px;line-height:1.2;}
+.post-title.lg{font-size:28px;}
+.post-excerpt{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:18px;}
+.post-meta{font-family:var(--mono);font-size:10px;color:var(--text3);display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+.post-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--border2);}
+.read-more{font-family:var(--mono);font-size:11px;color:var(--accent2);text-decoration:none;letter-spacing:.04em;display:inline-flex;align-items:center;gap:5px;margin-top:16px;border-bottom:1px solid transparent;transition:border-color .15s;padding-bottom:1px;}
+.read-more:hover{border-color:var(--accent2);}
+
+/* ── Post grid ── */
+.posts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:48px;}
+.post-card{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:24px;cursor:pointer;transition:border-color .2s,background .2s;display:flex;flex-direction:column;}
+.post-card:hover{border-color:var(--border2);background:var(--bg3);}
+.post-card .post-excerpt{font-size:13px;flex:1;}
+.post-card .post-title{font-size:17px;}
+
+/* ── Load more ── */
+.load-more-wrap{text-align:center;margin-top:8px;}
+.load-more-btn{font-family:var(--mono);font-size:11px;padding:10px 28px;border:1px solid var(--border2);border-radius:2px;background:transparent;color:var(--text2);cursor:pointer;letter-spacing:.08em;text-transform:uppercase;transition:all .15s;}
+.load-more-btn:hover{border-color:var(--accent);color:var(--accent2);}
+
+/* ── Sidebar-style categories ── */
+.blog-layout{display:grid;grid-template-columns:1fr 260px;gap:48px;align-items:start;}
+.sidebar{position:sticky;top:60px;}
+.sidebar-section{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:20px;margin-bottom:16px;}
+.sidebar-title{font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--text3);margin-bottom:14px;}
+.sidebar-tag{display:block;font-family:var(--mono);font-size:11px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);text-decoration:none;cursor:pointer;transition:color .15s;display:flex;justify-content:space-between;align-items:center;}
+.sidebar-tag:last-child{border-bottom:none;}
+.sidebar-tag:hover{color:var(--accent2);}
+.sidebar-tag span{font-size:10px;color:var(--text3);}
+.sidebar-stat{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);}
+.sidebar-stat:last-child{border-bottom:none;}
+.sidebar-stat-k{font-family:var(--mono);font-size:11px;color:var(--text2);}
+.sidebar-stat-v{font-family:var(--mono);font-size:12px;color:var(--accent2);}
+
+@media(max-width:780px){
+  .blog-layout{grid-template-columns:1fr;}
+  .sidebar{position:static;}
+  .posts-grid{grid-template-columns:1fr;}
+  .shell{padding:40px 16px 80px;}
+}
+@media(max-width:500px){
+  .post-featured{padding:24px 20px;}
+  .post-title.lg{font-size:22px;}
+}
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer */
+.nav-drawer{
+  display:none;
+  flex-direction:column;
+  background:rgba(10,10,18,.99);
+  border-top:1px solid var(--border);
+  padding:8px 0 12px;
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),padding .28s ease;
+}
+.nav-drawer.open{max-height:340px;padding:8px 0 16px;}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:12px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Responsive */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+  .nav-drawer{display:flex;}
+  .site-nav-inner{height:48px;}
+}
+
+</style>
+</head>
+<body>
+<!-- ── SITE NAV ── -->
+<nav class="site-nav" id="site-nav">
+  <div class="site-nav-inner">
+    <a href="/" class="site-nav-logo"><span>//</span> tracecord</a>
+    <div class="site-nav-links">
+      <a href="/" class="site-nav-link">home</a>
+      <a href="/dashboard" class="site-nav-link">dashboard</a>
+      <a href="/blog" class="site-nav-link active">blog</a>
+      <a href="/help" class="site-nav-link">help</a>
+      <a href="/removal" class="site-nav-link nav-removal">removal</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<!-- Mobile nav drawer (outside sticky nav to prevent clipping) -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="/" class="nav-drawer-link">home</a>
+  <a href="/dashboard" class="nav-drawer-link">dashboard</a>
+  <a href="/blog" class="nav-drawer-link active">blog</a>
+  <a href="/help" class="nav-drawer-link">help</a>
+  <a href="/removal" class="nav-drawer-link nav-removal">removal request</a>
+</div><div class="shell">
+  <div class="page-hdr">
+    <div class="page-eyebrow">// blog</div>
+    <h1 class="page-title">Updates &amp; Analysis</h1>
+    <p class="page-sub">Release notes, feature announcements, and observations from the team.</p>
+  </div>
+
+  <div class="blog-filters">
+    <button class="blog-filter active" onclick="filterPosts('all')">all posts</button>
+    <button class="blog-filter" onclick="filterPosts('update')">updates</button>
+    <button class="blog-filter" onclick="filterPosts('feature')">features</button>
+    <button class="blog-filter" onclick="filterPosts('analysis')">analysis</button>
+    <button class="blog-filter" onclick="filterPosts('privacy')">privacy</button>
+  </div>
+
+  <div class="blog-layout">
+    <div class="blog-main">
+      <!-- Featured -->
+      <div class="post-featured" data-tag="update">
+        <div>
+          <span class="post-featured-badge">featured</span>
+          <span class="post-tag update">update</span>
+        </div>
+        <div class="post-title lg">Timeline Reconstruction: Now with Activity Spike Detection</div>
+        <p class="post-excerpt">The timeline reconstruction tool now surfaces statistical anomalies — periods where message volume significantly exceeds baseline. Useful for identifying coordinated events, raids, or organic viral moments.</p>
+        <div class="post-meta">
+          <span>Feb 18, 2026</span>
+          <div class="post-meta-dot"></div>
+          <span>6 min read</span>
+          <div class="post-meta-dot"></div>
+          <span>v2.4.0</span>
+        </div>
+        <a href="#" class="read-more">read post →</a>
+      </div>
+
+      <!-- Grid posts -->
+      <div class="posts-grid" id="posts-grid">
+        <div class="post-card" data-tag="feature">
+          <span class="post-tag feature">feature</span>
+          <div class="post-title">Voice Session Replay: Who Was There and When</div>
+          <p class="post-excerpt">A deep dive into how voice session history is now stored and surfaced in user profile cards — including concurrent participant tracking and timeline overlap.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Feb 10, 2026</span>
+            <div class="post-meta-dot"></div>
+            <span>4 min read</span>
+          </div>
+          <a href="#" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+
+        <div class="post-card" data-tag="analysis">
+          <span class="post-tag analysis">analysis</span>
+          <div class="post-title">Message Deletion Patterns Across 50 Servers</div>
+          <p class="post-excerpt">An analysis of when and why messages get deleted — bots, moderators, and users each exhibit distinct temporal and behavioral signatures.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Jan 29, 2026</span>
+            <div class="post-meta-dot"></div>
+            <span>9 min read</span>
+          </div>
+          <a href="#" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+
+        <div class="post-card" data-tag="privacy">
+          <span class="post-tag privacy">privacy</span>
+          <div class="post-title">Our Data Retention Policy and Removal Process</div>
+          <p class="post-excerpt">Clarifying what we store, how long we keep it, and the full process for requesting removal of your messages from Tracecord.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Jan 15, 2026</span>
+            <div class="post-meta-dot"></div>
+            <span>5 min read</span>
+          </div>
+          <a href="/removal" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+
+        <div class="post-card" data-tag="update">
+          <span class="post-tag update">update</span>
+          <div class="post-title">v2.3: Interaction Graph + Writing Style Fingerprinting</div>
+          <p class="post-excerpt">The biggest release yet — force-directed graphs for visualizing user interactions, plus a behavioral writing style profile for each user.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Jan 5, 2026</span>
+            <div class="post-meta-dot"></div>
+            <span>7 min read</span>
+          </div>
+          <a href="#" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+
+        <div class="post-card" data-tag="feature">
+          <span class="post-tag feature">feature</span>
+          <div class="post-title">Signature Clustering: Linking Accounts Across Servers</div>
+          <p class="post-excerpt">How Tracecord builds behavioral signatures per user and uses them to surface potential alt accounts or shared-device users across different guilds.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Dec 20, 2025</span>
+            <div class="post-meta-dot"></div>
+            <span>6 min read</span>
+          </div>
+          <a href="#" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+
+        <div class="post-card" data-tag="analysis">
+          <span class="post-tag analysis">analysis</span>
+          <div class="post-title">The Edit-Delete Cycle: Behavioral Tells in Message Revision</div>
+          <p class="post-excerpt">Users who frequently edit-then-delete show distinct patterns from those who post-and-delete. A statistical breakdown across 10M+ message events.</p>
+          <div class="post-meta" style="margin-top:auto;padding-top:14px;">
+            <span>Dec 8, 2025</span>
+            <div class="post-meta-dot"></div>
+            <span>11 min read</span>
+          </div>
+          <a href="#" class="read-more" style="margin-top:12px">read →</a>
+        </div>
+      </div>
+
+      <div class="load-more-wrap">
+        <button class="load-more-btn">load older posts</button>
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-title">categories</div>
+        <a class="sidebar-tag" onclick="filterPosts('update')">updates <span>8</span></a>
+        <a class="sidebar-tag" onclick="filterPosts('feature')">features <span>5</span></a>
+        <a class="sidebar-tag" onclick="filterPosts('analysis')">analysis <span>7</span></a>
+        <a class="sidebar-tag" onclick="filterPosts('privacy')">privacy <span>3</span></a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-title">archive stats</div>
+        <div class="sidebar-stat"><span class="sidebar-stat-k">total posts</span><span class="sidebar-stat-v">23</span></div>
+        <div class="sidebar-stat"><span class="sidebar-stat-k">latest version</span><span class="sidebar-stat-v">v2.4.0</span></div>
+        <div class="sidebar-stat"><span class="sidebar-stat-k">last update</span><span class="sidebar-stat-v">Feb 18</span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+function filterPosts(tag) {
+  document.querySelectorAll('.blog-filter').forEach(b => {
+    b.classList.toggle('active', b.onclick.toString().includes(`'${tag}'`));
+  });
+  document.querySelectorAll('.post-card, .post-featured').forEach(card => {
+    const ct = card.dataset.tag;
+    card.style.display = (tag === 'all' || ct === tag) ? '' : 'none';
+  });
+}
+</script>
+
+
+<script>
+function toggleNav(){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  if(!h||!d)return;
+  const open=!d.classList.contains('open');
+  d.classList.toggle('open',open);
+  h.classList.toggle('open',open);
+  h.setAttribute('aria-expanded',String(open));
+}
+document.addEventListener('click',function(e){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  const nav=document.getElementById('site-nav');
+  if(!d||!h)return;
+  if(d.classList.contains('open')&&!nav.contains(e.target)&&!d.contains(e.target)){
+    d.classList.remove('open');
+    h.classList.remove('open');
+    h.setAttribute('aria-expanded','false');
+  }
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.nav-drawer-link').forEach(function(l){
+    l.addEventListener('click',function(){
+      const d=document.getElementById('nav-drawer');
+      const h=document.getElementById('nav-hamburger');
+      if(d)d.classList.remove('open');
+      if(h){h.classList.remove('open');h.setAttribute('aria-expanded','false');}
+    });
+  });
+});
+</script>
+</body>
+</html>

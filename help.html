@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>tracecord // help</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:90;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+  padding:0;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+  pointer-events:none;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer — rendered OUTSIDE sticky nav to avoid clipping */
+.nav-drawer{
+  position:fixed;
+  top:48px;left:0;right:0;
+  z-index:89;
+  background:rgba(10,10,18,.99);
+  border-bottom:1px solid var(--border);
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  flex-direction:column;
+  padding:0;
+  pointer-events:none;
+  opacity:0;
+  transform:translateY(-8px);
+  transition:opacity .22s ease,transform .22s ease;
+  display:flex;
+}
+.nav-drawer.open{
+  pointer-events:auto;
+  opacity:1;
+  transform:translateY(0);
+}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:13px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Show hamburger on mobile */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+}
+/* Always render drawer in DOM but hidden via opacity/pointer-events */
+
+:root {
+  --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#141420;--border:#1e1e2e;--border2:#2a2a3d;
+  --accent:#7c5cfc;--accent2:#a78bfa;--accent3:#06d6a0;
+  --red:#ff4d6d;--yellow:#ffd166;--blue:#60a5fa;--text:#e2e2f0;--text2:#8888aa;--text3:#555570;
+  --mono:'Space Mono',monospace;--sans:'Syne',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:0;opacity:.4;}
+
+.site-nav{background:rgba(10,10,15,.95);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);}
+.site-nav-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:44px;}
+.site-nav-logo{font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.15em;text-transform:uppercase;text-decoration:none;}
+.site-nav-logo span{color:var(--accent);}
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);text-decoration:none;padding:6px 12px;border-radius:2px;transition:color .15s,background .15s;}
+.site-nav-link:hover{color:var(--text2);background:var(--bg2);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.1);}
+.site-nav-link.nav-removal{color:var(--red);border:1px solid rgba(255,77,109,.2);padding:5px 11px;}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.4);}
+
+.help-layout{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:60px 24px 100px;display:grid;grid-template-columns:220px 1fr;gap:48px;align-items:start;}
+
+/* ── Sidebar nav ── */
+.help-sidebar{position:sticky;top:60px;}
+.help-nav-section{margin-bottom:28px;}
+.help-nav-title{font-family:var(--mono);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.help-nav-link{display:block;font-family:var(--mono);font-size:11px;color:var(--text2);text-decoration:none;padding:6px 10px;border-radius:2px;border-left:2px solid transparent;transition:all .15s;margin-bottom:2px;cursor:pointer;}
+.help-nav-link:hover{color:var(--text);background:var(--bg2);}
+.help-nav-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.08);}
+
+/* ── Content ── */
+.help-content{}
+.page-hdr{margin-bottom:48px;padding-bottom:28px;border-bottom:1px solid var(--border);}
+.page-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:12px;}
+.page-title{font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-.04em;color:var(--text);margin-bottom:10px;}
+.page-sub{font-size:15px;color:var(--text2);line-height:1.6;}
+
+/* ── Sections ── */
+.help-section{margin-bottom:56px;scroll-margin-top:70px;}
+.help-section-title{font-size:20px;font-weight:800;letter-spacing:-.02em;color:var(--text);margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+.help-section-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.help-p{font-size:14px;color:var(--text2);line-height:1.8;margin-bottom:16px;}
+
+/* ── FAQ accordion ── */
+.faq-item{border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.faq-q{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;cursor:pointer;transition:background .15s;gap:12px;}
+.faq-q:hover{background:var(--bg2);}
+.faq-q-text{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.faq-chevron{font-family:var(--mono);font-size:12px;color:var(--text3);flex-shrink:0;transition:transform .2s;}
+.faq-item.open .faq-chevron{transform:rotate(90deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+.faq-item.open .faq-a{max-height:300px;}
+.faq-a-inner{padding:4px 18px 18px;font-size:13px;color:var(--text2);line-height:1.75;border-top:1px solid var(--border);}
+
+/* ── Command reference ── */
+.cmd-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12px;margin-bottom:20px;}
+.cmd-table th{text-align:left;padding:8px 12px;background:var(--bg3);color:var(--text3);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border);}
+.cmd-table td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.cmd-table tr:last-child td{border-bottom:none;}
+.cmd-table tr:hover td{background:var(--bg2);}
+.cmd-name{color:var(--accent2);}
+.cmd-desc{color:var(--text2);}
+.cmd-badge{font-size:9px;padding:1px 6px;border-radius:2px;letter-spacing:.05em;text-transform:uppercase;border:1px solid;}
+.cmd-badge.get{color:var(--accent3);border-color:rgba(6,214,160,.3);background:rgba(6,214,160,.08);}
+.cmd-badge.post{color:var(--yellow);border-color:rgba(255,209,102,.3);background:rgba(255,209,102,.08);}
+
+/* ── Callout boxes ── */
+.callout{padding:16px 18px;border-radius:4px;border-left:3px solid;margin-bottom:18px;font-size:13px;line-height:1.7;}
+.callout.info{background:rgba(124,92,252,.06);border-color:var(--accent);color:var(--text2);}
+.callout.warn{background:rgba(255,209,102,.05);border-color:var(--yellow);color:var(--text2);}
+.callout.danger{background:rgba(255,77,109,.05);border-color:var(--red);color:var(--text2);}
+.callout strong{font-weight:700;}
+.callout.info strong{color:var(--accent2);}
+.callout.warn strong{color:var(--yellow);}
+.callout.danger strong{color:var(--red);}
+
+/* ── Code block ── */
+.code-block{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:16px 18px;font-family:var(--mono);font-size:12px;color:var(--accent3);overflow-x:auto;margin-bottom:16px;line-height:1.8;}
+.code-comment{color:var(--text3);}
+
+@media(max-width:780px){
+  .help-layout{grid-template-columns:1fr;padding:40px 16px 80px;}
+  .help-sidebar{position:static;display:none;}
+}
+@media(max-width:500px){
+  .help-content{font-size:14px;}
+  table{font-size:12px;}
+  .cmd-badge{font-size:8px;}
+}
+@media(max-width:500px){
+}
+/* ══════════════════════════════════════════════
+   SITE NAV — shared across all pages
+   ══════════════════════════════════════════════ */
+.site-nav{
+  background:rgba(10,10,15,.97);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:200;
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+.site-nav-inner{
+  max-width:1200px;margin:0 auto;
+  padding:0 20px;
+  display:flex;align-items:center;justify-content:space-between;
+  height:48px;gap:12px;
+}
+.site-nav-logo{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);letter-spacing:.15em;text-transform:uppercase;
+  text-decoration:none;flex-shrink:0;white-space:nowrap;
+  transition:color .15s;
+}
+.site-nav-logo:hover{color:var(--text2);}
+.site-nav-logo span{color:var(--accent);}
+/* Desktop links */
+.site-nav-links{display:flex;gap:2px;align-items:center;}
+.site-nav-link{
+  font-family:var(--mono);font-size:10px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:6px 11px;border-radius:3px;
+  transition:color .15s,background .15s;white-space:nowrap;
+}
+.site-nav-link:hover{color:var(--text2);background:rgba(255,255,255,.04);}
+.site-nav-link.active{color:var(--accent2);background:rgba(124,92,252,.12);}
+.site-nav-link.nav-removal{
+  color:var(--red);
+  border:1px solid rgba(255,77,109,.2);
+  padding:5px 10px;margin-left:4px;
+}
+.site-nav-link.nav-removal:hover{background:rgba(255,77,109,.1);border-color:rgba(255,77,109,.45);}
+/* Hamburger */
+.nav-hamburger{
+  display:none;
+  flex-direction:column;justify-content:center;align-items:center;
+  gap:5px;width:36px;height:36px;
+  background:transparent;border:1px solid var(--border2);
+  border-radius:4px;cursor:pointer;flex-shrink:0;
+  transition:border-color .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.nav-hamburger:hover{border-color:var(--accent);}
+.nav-hamburger span{
+  display:block;width:16px;height:1.5px;
+  background:var(--text2);border-radius:2px;
+  transition:transform .25s ease,opacity .2s ease,width .2s ease;
+}
+.nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.nav-hamburger.open span:nth-child(2){opacity:0;width:0;}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+/* Mobile drawer */
+.nav-drawer{
+  display:none;
+  flex-direction:column;
+  background:rgba(10,10,18,.99);
+  border-top:1px solid var(--border);
+  padding:8px 0 12px;
+  overflow:hidden;
+  max-height:0;
+  transition:max-height .32s cubic-bezier(.4,0,.2,1),padding .28s ease;
+}
+.nav-drawer.open{max-height:340px;padding:8px 0 16px;}
+.nav-drawer-link{
+  font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--text3);
+  text-decoration:none;padding:12px 20px;
+  border-left:2px solid transparent;
+  transition:color .15s,border-color .15s,background .15s;
+  display:block;
+}
+.nav-drawer-link:hover{color:var(--text);background:rgba(255,255,255,.03);border-left-color:var(--border2);}
+.nav-drawer-link.active{color:var(--accent2);border-left-color:var(--accent);background:rgba(124,92,252,.07);}
+.nav-drawer-link.nav-removal{color:var(--red);}
+.nav-drawer-link.nav-removal:hover{border-left-color:var(--red);background:rgba(255,77,109,.07);}
+/* Responsive */
+@media(max-width:640px){
+  .site-nav-links{display:none;}
+  .nav-hamburger{display:flex;}
+  .nav-drawer{display:flex;}
+  .site-nav-inner{height:48px;}
+}
+
+</style>
+</head>
+<body>
+<!-- ── SITE NAV ── -->
+<nav class="site-nav" id="site-nav">
+  <div class="site-nav-inner">
+    <a href="/" class="site-nav-logo"><span>//</span> tracecord</a>
+    <div class="site-nav-links">
+      <a href="/" class="site-nav-link">home</a>
+      <a href="/dashboard" class="site-nav-link">dashboard</a>
+      <a href="/blog" class="site-nav-link">blog</a>
+      <a href="/help" class="site-nav-link active">help</a>
+      <a href="/removal" class="site-nav-link nav-removal">removal</a>
+    </div>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu" aria-expanded="false" onclick="toggleNav()">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<!-- Mobile nav drawer (outside sticky nav to prevent clipping) -->
+<div class="nav-drawer" id="nav-drawer">
+  <a href="/" class="nav-drawer-link">home</a>
+  <a href="/dashboard" class="nav-drawer-link">dashboard</a>
+  <a href="/blog" class="nav-drawer-link">blog</a>
+  <a href="/help" class="nav-drawer-link active">help</a>
+  <a href="/removal" class="nav-drawer-link nav-removal">removal request</a>
+</div><div class="help-layout">
+  <!-- Sidebar -->
+  <aside class="help-sidebar">
+    <div class="help-nav-section">
+      <div class="help-nav-title">getting started</div>
+      <a class="help-nav-link active" onclick="scrollTo('getting-started')">Overview</a>
+      <a class="help-nav-link" onclick="scrollTo('dashboard')">Using the Dashboard</a>
+      <a class="help-nav-link" onclick="scrollTo('search')">Message Search</a>
+    </div>
+    <div class="help-nav-section">
+      <div class="help-nav-title">features</div>
+      <a class="help-nav-link" onclick="scrollTo('profiles')">User Profiles</a>
+      <a class="help-nav-link" onclick="scrollTo('timeline')">Timeline Reconstruction</a>
+      <a class="help-nav-link" onclick="scrollTo('api')">API Reference</a>
+    </div>
+    <div class="help-nav-section">
+      <div class="help-nav-title">account &amp; privacy</div>
+      <a class="help-nav-link" onclick="scrollTo('faq')">FAQ</a>
+      <a class="help-nav-link" onclick="scrollTo('removal-info')">Data Removal</a>
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="help-content">
+    <div class="page-hdr">
+      <div class="page-eyebrow">// help &amp; docs</div>
+      <h1 class="page-title">Documentation</h1>
+      <p class="page-sub">Everything you need to use Tracecord effectively. Find answers to common questions or explore the full feature reference.</p>
+    </div>
+
+    <!-- Getting started -->
+    <section class="help-section" id="getting-started">
+      <h2 class="help-section-title">Getting Started</h2>
+      <p class="help-p">Tracecord is a passive Discord message capture and analysis system. Once the bot is present in a server, all messages, edits, deletions, reactions, and voice events are recorded in real-time. The dashboard provides a web interface to search and analyze this data.</p>
+      <div class="callout info"><strong>Note:</strong> Tracecord only captures messages from servers where the bot has been explicitly added. Direct messages and servers without the bot are not archived.</div>
+      <p class="help-p">Data is stored indefinitely unless a removal request is submitted and approved. See the <a href="/removal" style="color:var(--accent2)">removal request page</a> for details on how to remove your data.</p>
+    </section>
+
+    <!-- Dashboard -->
+    <section class="help-section" id="dashboard">
+      <h2 class="help-section-title">Using the Dashboard</h2>
+      <p class="help-p">The dashboard is organized into four main tabs: Overview, Message Search, Users, and Timeline Reconstruction. The top-right header search lets you quickly find any user by ID or username.</p>
+      <p class="help-p">The <strong style="color:var(--text)">Overview</strong> tab shows aggregate stats and a per-server leaderboard. Select any server tab to view its specific stats and top users.</p>
+      <p class="help-p">All tables support clicking on usernames to open a detailed profile card with full behavioral analysis.</p>
+      <div class="callout warn"><strong>Performance:</strong> Queries over very large date ranges may be slow on large archives. Use the date filters in message search to narrow results.</div>
+    </section>
+
+    <!-- Search -->
+    <section class="help-section" id="search">
+      <h2 class="help-section-title">Message Search</h2>
+      <p class="help-p">The advanced search supports full-text matching combined with structured filters. All filters are combinable — leave any field blank to omit it.</p>
+      <div class="code-block">
+<span class="code-comment"># Example: find deleted messages from a user in a server after a date</span>
+query:    (empty — match all)
+from:     342819...  (user ID)
+server:   select from dropdown
+is:       deleted ✓
+after:    2025-12-01
+      </div>
+      <p class="help-p">The <strong style="color:var(--text)">has</strong> pills filter for messages containing images, videos, or file attachments. The <strong style="color:var(--text)">is</strong> pills filter for message state: deleted, edited, reply, or thread.</p>
+    </section>
+
+    <!-- Profiles -->
+    <section class="help-section" id="profiles">
+      <h2 class="help-section-title">User Profiles</h2>
+      <p class="help-p">Click any username anywhere in the dashboard to open a profile card. The profile is scope-aware — you can toggle between a specific-server view and a cross-server global view.</p>
+      <p class="help-p">Profile tabs include: Stats, Messages, Voice, Writing Style, Identity, Reactions, Interactions, and Connections. Each tab loads data on demand.</p>
+      <div class="callout info"><strong>Interaction Graph:</strong> The interactions tab shows a force-directed graph of who this user has replied to or been replied by. Drag nodes to rearrange. Click a node to open that user's profile.</div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="help-section" id="timeline">
+      <h2 class="help-section-title">Timeline Reconstruction</h2>
+      <p class="help-p">Timeline Reconstruction shows the true chronological record of messages — including those that have since been deleted or edited. You can filter to show only deleted messages, only edited messages, or statistical activity spikes.</p>
+      <p class="help-p">Optional filters for user ID, guild ID, and channel ID let you narrow the timeline to a specific conversation thread. The export button generates a JSON report of the current filtered view.</p>
+    </section>
+
+    <!-- API -->
+    <section class="help-section" id="api">
+      <h2 class="help-section-title">API Reference</h2>
+      <p class="help-p">The dashboard is backed by a REST API. All endpoints are accessible at the server root.</p>
+      <table class="cmd-table">
+        <tr><th>method</th><th>endpoint</th><th>description</th></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/stats</td><td class="cmd-desc">Aggregate Tracecord statistics</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/guilds</td><td class="cmd-desc">List all tracked servers</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/messages/search</td><td class="cmd-desc">Full-text + filter message search</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/users/search</td><td class="cmd-desc">Find users by name or ID</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/users/:id/profile</td><td class="cmd-desc">Full profile with stats and behavior</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/timeline-reconstruction</td><td class="cmd-desc">Paginated timeline with filters</td></tr>
+        <tr><td><span class="cmd-badge get">GET</span></td><td class="cmd-name">/timeline-reconstruction/export</td><td class="cmd-desc">JSON export of filtered timeline</td></tr>
+        <tr><td><span class="cmd-badge post">POST</span></td><td class="cmd-name">/removal-request</td><td class="cmd-desc">Submit a data removal request</td></tr>
+      </table>
+    </section>
+
+    <!-- FAQ -->
+    <section class="help-section" id="faq">
+      <h2 class="help-section-title">Frequently Asked Questions</h2>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">Can I see messages from servers I'm not in?</span>
+          <span class="faq-chevron">›</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">The dashboard shows messages from all servers the Tracecord bot is in. There is no per-user restriction on which servers you can query — it's a shared index.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">How quickly are deleted messages captured?</span>
+          <span class="faq-chevron">›</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Deletion events are captured in real-time via the Discord gateway. As long as the Tracecord bot is online when a message is deleted, it will be recorded. There is no way to retroactively delete a message from Tracecord once it's been captured.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">Does the backfill capture messages before the bot joined?</span>
+          <span class="faq-chevron">›</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Yes — the backfill process uses the Discord API to retrieve historical messages from accessible channels before the bot joined. However, it cannot recover already-deleted messages from before the bot's join date, as those are not returned by the API.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">How do I remove my messages from Tracecord?</span>
+          <span class="faq-chevron">›</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">You can submit a removal request on the <a href="/removal" style="color:var(--accent2)">removal request page</a>. Provide your Discord user ID and a reason. Requests are reviewed and processed within 7 days.</div></div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          <span class="faq-q-text">What is the "writing style fingerprint"?</span>
+          <span class="faq-chevron">›</span>
+        </div>
+        <div class="faq-a"><div class="faq-a-inner">Each user's writing style is analyzed for word length, sentence structure, punctuation usage, capitalization patterns, and common vocabulary. This produces a statistical signature that can be used to compare writing styles across users or detect alt accounts.</div></div>
+      </div>
+    </section>
+
+    <!-- Removal info -->
+    <section class="help-section" id="removal-info">
+      <h2 class="help-section-title">Data Removal</h2>
+      <p class="help-p">We respect data removal requests. To request removal of your messages, navigate to the <a href="/removal" style="color:var(--accent2)">removal request page</a> and complete the form.</p>
+      <div class="callout danger"><strong>Important:</strong> Removal requests cover your messages in the Tracecord database. They do not affect what Discord stores or what other users may have screenshotted.</div>
+      <p class="help-p">Removal requests are reviewed manually. You'll need to provide your Discord user ID and verify that you are the account owner. Processing typically takes up to 7 days.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
+}
+function scrollTo(id) {
+  document.getElementById(id)?.scrollIntoView({behavior:'smooth'});
+  document.querySelectorAll('.help-nav-link').forEach(l => {
+    l.classList.toggle('active', l.getAttribute('onclick')?.includes(id));
+  });
+}
+// Highlight sidebar on scroll
+const sections = document.querySelectorAll('.help-section');
+window.addEventListener('scroll', () => {
+  let cur = '';
+  sections.forEach(s => { if(window.scrollY >= s.offsetTop - 80) cur = s.id; });
+  document.querySelectorAll('.help-nav-link').forEach(l => {
+    l.classList.toggle('active', l.getAttribute('onclick')?.includes(cur));
+  });
+}, {passive:true});
+</script>
+
+
+<script>
+function toggleNav(){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  if(!h||!d)return;
+  const open=!d.classList.contains('open');
+  d.classList.toggle('open',open);
+  h.classList.toggle('open',open);
+  h.setAttribute('aria-expanded',String(open));
+}
+document.addEventListener('click',function(e){
+  const h=document.getElementById('nav-hamburger');
+  const d=document.getElementById('nav-drawer');
+  const nav=document.getElementById('site-nav');
+  if(!d||!h)return;
+  if(d.classList.contains('open')&&!nav.contains(e.target)&&!d.contains(e.target)){
+    d.classList.remove('open');
+    h.classList.remove('open');
+    h.setAttribute('aria-expanded','false');
+  }
+},true);
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.nav-drawer-link').forEach(function(l){
+    l.addEventListener('click',function(){
+      const d=document.getElementById('nav-drawer');
+      const h=document.getElementById('nav-hamburger');
+      if(d)d.classList.remove('open');
+      if(h){h.classList.remove('open');h.setAttribute('aria-expanded','false');}
+    });
+  });
+});
+</script>
+</body>
+</html>
